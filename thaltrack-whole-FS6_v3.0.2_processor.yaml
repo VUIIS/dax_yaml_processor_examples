@@ -1,0 +1,91 @@
+---
+# https://github.com/baxpr/thaltrack-whole
+moreauto: true
+procversion: 3.0.2
+procname: thaltrack-whole-FS6
+proctype: thaltrack-whole-FS6_v3
+
+inputs:
+  default:
+    container_path: thaltrack-whole_v3.0.2.sif
+    container_source: shub://baxpr/thaltrack-whole:v3.0.2
+    freesurfer_license: /data/mcr/centos7/FS6/license.txt
+    probtrack_samples: 5000
+    dirname_tag: "FS6"
+    source_regions: "FS_THALAMUS"
+    target_regions: "FS_PFC FS_MOTOR FS_SOMATO FS_POSTPAR FS_OCC FS_TEMP"
+  xnat:
+    filters:
+      - type: match
+        inputs: assr_dwipre,assr_bedpost/assr_dwipre
+      - type: match
+        inputs: assr_freesurfer/scan_t1,assr_cat12/t1scan
+    assessors:
+      - name: assr_freesurfer
+        proctypes: freesurfer_dev_v2
+        needs_qc: False
+        resources:
+          - {resource: SUBJECT,      ftype: DIR,  fdest: SUBJECT,               varname: subject_dir}
+          - {resource: NII_THALAMUS, ftype: FILE, fdest: nii_thalamus.nii.gz,   varname: fs_nii_thalamus_niigz}
+      - name: assr_dwipre
+        proctypes: dwipre-PNC_v1,dwipre-PNC-edit_v1
+        needs_qc: False
+        resources:
+          - {resource: B0_MEAN,      ftype: FILE,  fdest: b0_mean.nii.gz,       varname: b0mean_niigz}
+      - name: assr_cat12
+        proctypes: cat12_ndw_v1
+        needs_qc: False
+        resources:
+          - {resource: DEF_FWD,      ftype: FILE,  fdest: y_t1.nii.gz,          varname: fwddef_niigz}
+          - {resource: DEF_INV,      ftype: FILE,  fdest: iy_t1.nii.gz,         varname: invdef_niigz}
+      - name: assr_bedpost
+        proctypes: ybedpostx_v2,ybedpostx-edit_v2
+        needs_qc: True
+        resources:
+          - {resource: BEDPOSTX,      ftype: DIR,  fdest: BEDPOSTX,             varname: bedpost_dir}
+    attrs:
+      - {varname: project, object: session, attr: project}
+      - {varname: subject, object: session, attr: subject_label}
+      - {varname: session, object: session, attr: label}
+
+outputs:
+  - {path: PDF/thaltrack_whole.pdf, type: FILE, resource: PDF}
+  - {path: ROIS_FS, type: DIR, resource: ROIS_FS}
+  - {path: PROBTRACKS, type: DIR, resource: PROBTRACKS}
+  - {path: COREG_MAT, type: DIR, resource: COREG_MAT}
+  - {path: B0_MEAN_TO_FS, type: DIR, resource: B0_MEAN_TO_FS}
+  - {path: STATS_INDIV, type: DIR, resource: STATS_INDIV}
+  - {path: STATS_MULTI, type: DIR, resource: STATS_MULTI}
+
+
+command: >-
+  singularity
+  run
+  --cleanenv
+  --home $INDIR
+  --bind $INDIR:/INPUTS
+  --bind $OUTDIR:/OUTPUTS
+  --bind {freesurfer_license}:/usr/local/freesurfer/.license
+  {container_path}
+  --fs_subject_dir /INPUTS/{subject_dir}/SUBJECT
+  --fs_nii_thalamus_niigz /INPUTS/{fs_nii_thalamus_niigz}
+  --b0mean_niigz /INPUTS/{b0mean_niigz}
+  --invdef_niigz /INPUTS/{invdef_niigz}
+  --fwddef_niigz /INPUTS/{fwddef_niigz}
+  --bedpost_dir /INPUTS/{bedpost_dir}/BEDPOSTX
+  --probtrack_samples {probtrack_samples}
+  --dirname_tag {dirname_tag}
+  --source_regions \"{source_regions}\"
+  --target_regions \"{target_regions}\"
+  --project {project}
+  --subject {subject}
+  --session {session}
+  --out_dir /OUTPUTS
+
+
+attrs:
+  xsitype: proc:genProcData
+  walltime: '8-00:00:00'
+  memory: 16G
+  ppn: 1
+jobtemplate: job_template.txt
