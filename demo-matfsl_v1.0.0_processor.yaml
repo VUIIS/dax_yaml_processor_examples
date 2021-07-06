@@ -39,19 +39,10 @@ inputs:
             varname: seg_niigz
 
     attrs:
-      - varname: project
-        object: session
-        attr: project
-      - varname: subject
-        object: session
-        attr: subject_label
-      - varname: session
-        object: session
-        attr: label
-      - varname: scan
-        object: scan
-        attr: ID
-        ref: scan_t1
+      - {varname: project, object: assessor, attr: project}
+      - {varname: subject, object: session, attr: subject_label}
+      - {varname: session, object: session, attr: label}
+      - {varname: scan, object: scan, attr: ID, ref: scan_t1}
 
 outputs:
 
