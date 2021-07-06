@@ -1,0 +1,83 @@
+---
+
+moreauto: true
+procversion: 1.0.0
+procname: demo-matfsl
+proctype: demo-matfsl_v1
+
+inputs:
+  default:
+    container_path: demo-singularity-matlab-fsl_v1.0.0.simg
+    diameter_mm: 30
+    
+  xnat:
+
+    filters:
+      - type: match
+        inputs: scan_t1,assr_slant/scan_t1
+        
+    scans:
+
+      - name: scan_t1
+        types: T1_3DAXIAL
+        needs_qc: False
+        resources:
+          - resource: NIFTI
+            ftype: FILE
+            fdest: t1.nii.gz
+            varname: t1_niigz
+            
+    assessors:
+
+      - name: assr_slant
+        proctypes: slant_cpu_v1
+        needs_qc: False
+        resources:
+          - resource: SEG
+            ftype: FILE
+            fdest: seg.nii.gz
+            varname: seg_niigz
+
+    attrs:
+      - varname: project
+        object: session
+        attr: project
+      - varname: subject
+        object: session
+        attr: subject_label
+      - varname: session
+        object: session
+        attr: label
+      - varname: scan
+        object: scan
+        attr: ID
+        ref: scan_t1
+
+outputs:
+
+  - {path: PDF/demo.pdf, type: FILE, resource: PDF}
+
+
+command: >-
+  singularity run --cleanenv --contain
+  --home $INDIR
+  --bind $INDIR:/INPUTS
+  --bind $OUTDIR:/OUTPUTS
+  {container_path}
+  t1_niigz /INPUTS/{t1_niigz}
+  seg_niigz /INPUTS/{seg_niigz}
+  diameter_mm {diameter_mm}
+  project {project}
+  subject {subject}
+  session {session}
+  scan {scan}
+  out_dir /OUTPUTS
+  
+attrs:
+  xsitype: proc:genProcData
+  walltime: '01:00:00'
+  memory: 8G
+  ppn: 1
+
+jobtemplate: job_template.txt
+
