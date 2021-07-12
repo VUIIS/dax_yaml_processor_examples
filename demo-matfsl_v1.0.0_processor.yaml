@@ -55,14 +55,11 @@ command: >-
   --bind $INDIR:/INPUTS
   --bind $OUTDIR:/OUTPUTS
   {container_path}
-  t1_niigz /INPUTS/{t1_niigz}
-  seg_niigz /INPUTS/{seg_niigz}
-  diameter_mm {diameter_mm}
-  project {project}
-  subject {subject}
-  session {session}
-  scan {scan}
-  out_dir /OUTPUTS
+  --t1_niigz /INPUTS/{t1_niigz}
+  --seg_niigz /INPUTS/{seg_niigz}
+  --diameter_mm {diameter_mm}
+  --label_info "{project} {subject} {session} {scan}"
+  --out_dir /OUTPUTS
   
 attrs:
   xsitype: proc:genProcData
