@@ -15,7 +15,7 @@ inputs:
       - name: scan_t1
         types: T1
         resources:
-          - {resource: NIFTI, ftype: FILE, fmatch: '*.nii.gz', fdest: t1.nii.gz}
+          - {resource: NIFTI, ftype: FILE, fmatch: '*.nii.gz', fdest: T1.nii.gz}
 
 outputs:
   - pdf: FinalPDF/T1_result.pdf
