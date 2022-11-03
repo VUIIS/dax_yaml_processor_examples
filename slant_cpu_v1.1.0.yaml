@@ -1,0 +1,30 @@
+---
+procyamlversion: 3.0.0-dev.0
+
+containers:
+  - name: slant
+    path: slant_cpu_v1.1.0.simg
+
+requirements:
+  walltime: "72:00:00"
+  memory: 64000
+
+inputs:
+  xnat:
+    scans:
+      - name: scan_t1
+        types: T1
+        resources:
+          - {resource: NIFTI, ftype: FILE, fmatch: '*.nii.gz', fdest: t1.nii.gz}
+
+outputs:
+  - pdf: FinalPDF/T1_result.pdf
+  - {path: FinalResult/T1_seg.nii.gz, type: FILE, resource: SEG}
+  - {path: FinalVolTxt/T1_label_volumes.txt, type: FILE, resource: STATS}
+
+command:
+  type: singularity_run
+  container: slant
+  args: bash -c 'touch ~/.bashrc && /extra/run_deep_brain_seg.sh'
+
+jobtemplate: job_template_v3.txt
